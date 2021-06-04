@@ -21,7 +21,7 @@ import { PieChartTransformedProps } from './plugin/types';
 import Echart from './components/Echart';
 import { EventHandlers } from './types';
 
-export default function HelloWorld({
+export default function ColumnChart({
   height,
   width,
   echartOptions,

@@ -23,6 +23,7 @@ import {
   DataRecordValue,
   QueryFormData,
   SetDataMaskHook,
+  QueryFormMetric,
 } from '@superset-ui/core';
 import {
   DEFAULT_LEGEND_FORM_DATA,
@@ -37,7 +38,9 @@ export type EchartsPieFormData = QueryFormData &
     currentOwnValue?: string[] | null;
     defaultValue?: string[] | null;
     groupby: string[];
-    metric?: string;
+    metric: '';
+    columns: string[];
+    stack: boolean;
     numberFormat: string;
     dateFormat: string;
     showLabelsThreshold: number;

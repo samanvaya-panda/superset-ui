@@ -1,7 +1,7 @@
 {
-  "name": "@superset-ui/plugin-chart-hello-world",
-  "version": "0.0.0",
-  "description": "Superset Chart - Hello World",
+  "name": "@superset-ui/plugin-chart-column-chart",
+  "version": "0.1.0",
+  "description": "Superset Chart - Column Chart",
   "sideEffects": false,
   "main": "lib/index.js",
   "module": "esm/index.js",

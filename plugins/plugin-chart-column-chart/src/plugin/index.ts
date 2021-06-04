@@ -23,7 +23,7 @@ import transformProps from './transformProps';
 import thumbnail from '../images/thumbnail.png';
 import { EchartsPieChartProps, EchartsPieFormData } from './types';
 
-export default class HelloWorldChartPlugin extends ChartPlugin<
+export default class ColumnChartPlugin extends ChartPlugin<
   EchartsPieFormData,
   EchartsPieChartProps
 > {
@@ -41,7 +41,7 @@ export default class HelloWorldChartPlugin extends ChartPlugin<
     super({
       buildQuery,
       controlPanel,
-      loadChart: () => import('../HelloWorld'),
+      loadChart: () => import('../ColumnChart'),
       metadata: new ChartMetadata({
         behaviors: [Behavior.INTERACTIVE_CHART],
         credits: ['https://echarts.apache.org'],

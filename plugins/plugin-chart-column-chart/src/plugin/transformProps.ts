@@ -43,9 +43,9 @@ import {
 } from '../utils/series';
 import { defaultGrid, defaultTooltip } from '../defaults';
 
-const percentFormatter = getNumberFormatter(NumberFormats.PERCENT_2_POINT);
+//Rendering of labels
 
-export function formatPieLabel({
+export function formatLabel({
   params,
   labelType,
   numberFormatter,
@@ -54,23 +54,16 @@ export function formatPieLabel({
   labelType: EchartsPieLabelType;
   numberFormatter: NumberFormatter;
 }): string {
-  const { name = '', value, percent } = params;
+  const { name = '', value } = params;
   const formattedValue = numberFormatter(value as number);
-  const formattedPercent = percentFormatter((percent as number) / 100);
 
   switch (labelType) {
     case EchartsPieLabelType.Key:
       return name;
     case EchartsPieLabelType.Value:
       return formattedValue;
-    case EchartsPieLabelType.Percent:
-      return formattedPercent;
     case EchartsPieLabelType.KeyValue:
       return `${name}: ${formattedValue}`;
-    case EchartsPieLabelType.KeyValuePercent:
-      return `${name}: ${formattedValue} (${formattedPercent})`;
-    case EchartsPieLabelType.KeyPercent:
-      return `${name}: ${formattedPercent}`;
     default:
       return name;
   }
@@ -88,6 +81,8 @@ export default function transformProps(chartProps: EchartsPieChartProps): PieCha
     legendOrientation,
     legendType,
     metric = '',
+    stack,
+    columns,
     numberFormat,
     dateFormat,
     showLabels,
@@ -95,16 +90,20 @@ export default function transformProps(chartProps: EchartsPieChartProps): PieCha
     showLabelsThreshold,
     emitFilter,
   }: EchartsPieFormData = { ...DEFAULT_LEGEND_FORM_DATA, ...DEFAULT_PIE_FORM_DATA, ...formData };
+
+  console.log('columns', columns);
+  console.log('groupby', groupby);
+  // const metricsLabel = metrics.map(metric => getMetricLabel(metric));
   const metricLabel = getMetricLabel(metric);
 
-  const keys = data.map(datum =>
-    extractGroupbyLabel({
-      datum,
-      groupby,
-      coltypeMapping,
-      timeFormatter: getTimeFormatter(dateFormat),
-    }),
-  );
+  // const keys = data.map(datum =>
+  //   extractGroupbyLabel({
+  //     datum,
+  //     groupby,
+  //     coltypeMapping,
+  //     timeFormatter: getTimeFormatter(dateFormat),
+  //   }),
+  // );
   const labelMap = data.reduce((acc: Record<string, DataRecordValue[]>, datum) => {
     const label = extractGroupbyLabel({
       datum,
@@ -118,41 +117,84 @@ export default function transformProps(chartProps: EchartsPieChartProps): PieCha
     };
   }, {});
 
+  const keys = Object.keys(labelMap);
+  // console.log("keys", keys);
+  // console.log("labelMap", Object.keys(labelMap));
+
+  const breakdownMap = {};
+  if (columns.length === 1) {
+    data.forEach(datum => {
+      var key = columns.map(col => datum[col]);
+      if (!(key[0] in breakdownMap)) {
+        breakdownMap[key[0]] = key;
+      }
+    });
+  }
+
+  console.log('Breakdown', breakdownMap);
+  console.log('labelMap', labelMap);
+
   const { setDataMask = () => {} } = hooks;
 
   const colorFn = CategoricalColorNamespace.getScale(colorScheme as string);
   const numberFormatter = getNumberFormatter(numberFormat);
 
-  const transformedData: BarSeriesOption[] = data.map(datum => {
-    const name = extractGroupbyLabel({
-      datum,
-      groupby,
-      coltypeMapping,
-      timeFormatter: getTimeFormatter(dateFormat),
-    });
+  var transformedData;
+  if (columns.length === 0) {
+    const transformData = data.map(datum => {
+      const name = extractGroupbyLabel({
+        datum,
+        groupby,
+        coltypeMapping,
+        timeFormatter: getTimeFormatter(dateFormat),
+      });
 
-    return {
-      value: datum[metricLabel],
-      name,
-      itemStyle: {
-        color: colorFn(name),
-      },
-    };
-  });
-
-  const selectedValues = (filterState.selectedValues || []).reduce(
-    (acc: Record<string, number>, selectedValue: string) => {
-      const index = transformedData.findIndex(({ name }) => name === selectedValue);
       return {
-        ...acc,
-        [index]: selectedValue,
+        // value: metricsLabel.map(metricsLabel => datum[metricsLabel]),
+        value: datum[metricLabel],
+        name,
+        itemStyle: {
+          color: colorFn(name),
+        },
       };
-    },
-    {},
-  );
+    });
+    transformedData = transformData;
+  } else if (columns.length === 1) {
+    const transformData = {};
+    data.forEach(datum => {
+      var key = columns.map(col => datum[col])[0];
+      if (!(key in transformData)) {
+        transformData[key] = [];
+      }
+      transformData[key].push({
+        value: datum[metricLabel],
+        name: groupby.map(col => datum[col])[0],
+        itemStyle: {
+          color: colorFn(key),
+        },
+      });
+    });
+    transformedData = transformData;
+  }
+
+  const selectedValues = [];
+  // console.log("data", transformedData[0].value);
+  // const selectedValues = (filterState.selectedValues || []).reduce(
+  //   (acc: Record<string, number>, selectedValue: string) => {
+  //     const index = transformedData.findIndex(({ name }) => name === selectedValue);
+  //     return {
+  //       ...acc,
+  //       [index]: selectedValue,
+  //     };
+  //   },
+  //   {},
+  // );
+
+  // console.log("data", data);
+  // console.log("transformedData", transformedData);
 
   const formatter = (params: CallbackDataParams) =>
-    formatPieLabel({
+    formatLabel({
       params,
       numberFormatter,
       labelType,
@@ -163,13 +205,59 @@ export default function transformProps(chartProps: EchartsPieChartProps): PieCha
     show: showLabels,
     color: '#000000',
   };
+  // const series: BarSeriesOption[] = [
+  //   {
+  //     type: 'bar',
+  //     ...getChartPadding(showLegend, legendOrientation, legendMargin),
+  //     animation: false,
+  //     stack: 'total',
+  //     label: {
+  //       show: true,
+  //     },
+  //     emphasis: {
+  //       label: {
+  //         show: true,
+  //         fontWeight: 'bold',
+  //         backgroundColor: 'white',
+  //       },
+  //     },
+  //     data: transformedData,
+  //   },
+  // ];
 
-  const series: BarSeriesOption[] = [
-    {
+  // console.log(transformedData.name);
+  console.log('data', data);
+  console.log('transformedData', transformedData);
+  const series: BarSeriesOption[] = [];
+  if (columns.length) {
+    for (var key in breakdownMap) {
+      series.push({
+        name: key,
+        type: 'bar',
+        ...getChartPadding(showLegend, legendOrientation, legendMargin),
+        animation: false,
+        stack,
+        label: {
+          show: true,
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontWeight: 'bold',
+            backgroundColor: 'white',
+          },
+          // focus:'series',
+        },
+        data: transformedData[key],
+      });
+    }
+  } else {
+    series.push({
+      name: metricLabel,
       type: 'bar',
       ...getChartPadding(showLegend, legendOrientation, legendMargin),
       animation: false,
-      stack: 'total',
+      stack,
       label: {
         show: true,
       },
@@ -179,10 +267,14 @@ export default function transformProps(chartProps: EchartsPieChartProps): PieCha
           fontWeight: 'bold',
           backgroundColor: 'white',
         },
+        // focus:'series',
       },
       data: transformedData,
-    },
-  ];
+    });
+  }
+
+  console.log('Series', series);
+  //console.log("Legend", labelMap.keys());
 
   const echartOptions: EChartsOption = {
     grid: {
@@ -191,12 +283,6 @@ export default function transformProps(chartProps: EchartsPieChartProps): PieCha
     tooltip: {
       ...defaultTooltip,
       trigger: 'item',
-      formatter: (params: any) =>
-        formatPieLabel({
-          params,
-          numberFormatter,
-          labelType: EchartsPieLabelType.KeyValuePercent,
-        }),
     },
     xAxis: {
       type: 'value',
@@ -207,10 +293,12 @@ export default function transformProps(chartProps: EchartsPieChartProps): PieCha
     },
     legend: {
       ...getLegendProps(legendType, legendOrientation, showLegend),
-      data: keys,
+      data: metricLabel,
     },
-    series,
+    series: series,
   };
+
+  // console.log(echartOptions);
 
   return {
     formData,

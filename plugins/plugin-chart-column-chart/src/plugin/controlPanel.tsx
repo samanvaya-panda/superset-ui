@@ -41,6 +41,7 @@ const config: ControlPanelConfig = {
         ['metric'],
         ['adhoc_filters'],
         ['groupby'],
+        ['columns'],
         ['row_limit'],
         [
           {
@@ -141,12 +142,12 @@ const config: ControlPanelConfig = {
     },
   ],
   controlOverrides: {
-    series: {
-      validators: [validateNonEmpty],
-      clearable: false,
-    },
     row_limit: {
       default: 100,
+    },
+    columns: {
+      label: t('Breakdowns'),
+      description: t('Defines how each series is broken down'),
     },
   },
 };
