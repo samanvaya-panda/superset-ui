@@ -21,12 +21,9 @@ import buildQuery from './plugin/buildQuery';
 import controlPanel from './plugin/controlPanel';
 import transformProps from './plugin/transformProps';
 import thumbnail from './images/thumbnail.png';
-import { EchartsPieChartProps, EchartsPieFormData } from './plugin/types';
+import { ColumnChartProps, FormData } from './plugin/types';
 
-export default class ColumnChartPlugin extends ChartPlugin<
-  EchartsPieFormData,
-  EchartsPieChartProps
-> {
+export default class ColumnChartPlugin extends ChartPlugin<FormData, ColumnChartProps> {
   /**
    * The constructor is used to pass relevant metadata and callbacks that get
    * registered in respective registries that are used throughout the library

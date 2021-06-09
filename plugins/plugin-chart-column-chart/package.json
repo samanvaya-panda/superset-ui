@@ -1,14 +1,17 @@
 {
-  "name": "@superset-ui/plugin-chart-column-chart",
-  "version": "0.1.0",
+  "name": "plugin-chart-column-chart",
+  "version": "0.2.0",
   "description": "Superset Chart - Column Chart",
   "sideEffects": false,
-  "main": "lib/index.js",
-  "module": "esm/index.js",
+  "main": "index.js",
+  "module": "lib/index.js",
   "files": [
-    "esm",
     "lib"
   ],
+  "scripts": {
+    "build": "npm run clean && tsc && webpack",
+    "clean": "shx rm -rf _bundles lib esm"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/apache-superset/superset-ui.git"
@@ -26,19 +29,29 @@
     "access": "public"
   },
   "dependencies": {
-    "@superset-ui/core": "^0.17.40",
     "@superset-ui/chart-controls": "^0.17.41",
+    "@superset-ui/core": "^0.17.40",
     "@types/mathjs": "^6.0.7",
     "d3-array": "^1.2.0",
     "echarts": "^5.1.1",
     "lodash": "^4.17.15",
-    "mathjs": "^8.0.1"
+    "mathjs": "^8.0.1",
+    "shx": "^0.3.3"
   },
   "peerDependencies": {
     "react": "^16.13.1"
   },
   "devDependencies": {
     "@types/jest": "^26.0.0",
-    "jest": "^26.0.1"
+    "awesome-typescript-loader": "^5.2.1",
+    "file-loader": "^6.2.0",
+    "image-webpack-loader": "^7.0.1",
+    "jest": "^26.0.1",
+    "ts-loader": "^9.2.3",
+    "typescript": "^4.3.2",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.38.1",
+    "webpack-cli": "^4.7.2"
   }
 }

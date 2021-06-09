@@ -17,7 +17,7 @@
  * under the License.
  */
 import React, { useCallback } from 'react';
-import { PieChartTransformedProps } from './plugin/types';
+import { TransformedProps } from './plugin/types';
 import Echart from './components/Echart';
 import { EventHandlers } from './types';
 
@@ -30,7 +30,7 @@ export default function ColumnChart({
   groupby,
   selectedValues,
   formData,
-}: PieChartTransformedProps) {
+}: TransformedProps) {
   const handleChange = useCallback(
     (values: string[]) => {
       if (!formData.emitFilter) {

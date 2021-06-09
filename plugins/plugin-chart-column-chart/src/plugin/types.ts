@@ -23,7 +23,6 @@ import {
   DataRecordValue,
   QueryFormData,
   SetDataMaskHook,
-  QueryFormMetric,
 } from '@superset-ui/core';
 import {
   DEFAULT_LEGEND_FORM_DATA,
@@ -32,7 +31,7 @@ import {
   LegendType,
 } from '../types';
 
-export type EchartsPieFormData = QueryFormData &
+export type FormData = QueryFormData &
   EchartsLegendFormData & {
     colorScheme?: string;
     currentOwnValue?: string[] | null;
@@ -40,29 +39,20 @@ export type EchartsPieFormData = QueryFormData &
     groupby: string[];
     metric: '';
     columns: string[];
-    stack: boolean;
+    stack: '';
     numberFormat: string;
     dateFormat: string;
     showLabelsThreshold: number;
     emitFilter: boolean;
   };
 
-export enum EchartsPieLabelType {
-  Key = 'key',
-  Value = 'value',
-  Percent = 'percent',
-  KeyValue = 'key_value',
-  KeyPercent = 'key_percent',
-  KeyValuePercent = 'key_value_percent',
-}
-
-export interface EchartsPieChartProps extends ChartProps {
-  formData: EchartsPieFormData;
+export interface ColumnChartProps extends ChartProps {
+  formData: FormData;
   queriesData: ChartDataResponseResult[];
 }
 
 // @ts-ignore
-export const DEFAULT_FORM_DATA: EchartsPieFormData = {
+export const DEFAULT_FORM_DATA: FormData = {
   ...DEFAULT_LEGEND_FORM_DATA,
   groupby: [],
   legendOrientation: LegendOrientation.Top,
@@ -73,8 +63,8 @@ export const DEFAULT_FORM_DATA: EchartsPieFormData = {
   dateFormat: 'smart_date',
 };
 
-export interface PieChartTransformedProps {
-  formData: EchartsPieFormData;
+export interface TransformedProps {
+  formData: FormData;
   height: number;
   width: number;
   echartOptions: EChartsOption;
