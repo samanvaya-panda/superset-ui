@@ -1,5 +1,5 @@
 {
-  "name": "plugin-chart-column-chart",
+  "name": "@superset-ui/plugin-chart-column-chart",
   "version": "0.2.0",
   "description": "Superset Chart - Column Chart",
   "sideEffects": false,

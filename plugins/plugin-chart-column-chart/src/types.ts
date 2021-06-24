@@ -79,6 +79,20 @@ export const DEFAULT_LEGEND_FORM_DATA: EchartsLegendFormData = {
   showLegend: false,
 };
 
+export type EchartsLabelFormData = {
+  showLabel: boolean;
+  labelName: string;
+  isBold: boolean;
+  labelColor: string;
+};
+
+export const DEFAULT_LABEL_FORM_DATA: EchartsLabelFormData = {
+  showLabel: false,
+  labelName: '',
+  isBold: false,
+  labelColor: 'red',
+};
+
 export type EventHandlers = Record<string, { (props: any): void }>;
 
 export enum LabelPositionEnum {

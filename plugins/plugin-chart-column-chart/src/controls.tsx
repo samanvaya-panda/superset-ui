@@ -1,7 +1,7 @@
 import React from 'react';
 import { t } from '@superset-ui/core';
 import { ControlPanelsContainerProps } from '@superset-ui/chart-controls';
-import { DEFAULT_LEGEND_FORM_DATA } from './types';
+import { DEFAULT_LEGEND_FORM_DATA, DEFAULT_LABEL_FORM_DATA } from './types';
 
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -22,6 +22,7 @@ import { DEFAULT_LEGEND_FORM_DATA } from './types';
  * under the License.
  */
 const { legendMargin, legendOrientation, legendType, showLegend } = DEFAULT_LEGEND_FORM_DATA;
+const { showLabel, labelName, isBold, labelColor } = DEFAULT_LABEL_FORM_DATA;
 
 const showLegendControl = {
   name: 'show_legend',
@@ -92,4 +93,65 @@ export const legendSection = [
   [legendTypeControl],
   [legendOrientationControl],
   [legendMarginControl],
+];
+
+const showLabelControl = {
+  name: 'show_label',
+  config: {
+    type: 'CheckboxControl',
+    label: t('Label Customisations'),
+    renderTrigger: true,
+    default: showLabel,
+    description: t('Make customisations to labels'),
+  },
+};
+
+const labelChoice = {
+  name: 'labelName',
+  config: {
+    type: 'TextControl',
+    label: t('Enter Label Name'),
+    renderTrigger: true,
+    default: labelName,
+    description: t('Name of the label which is to be customised'),
+    visibility: ({ controls }: ControlPanelsContainerProps) => Boolean(controls?.show_label?.value),
+  },
+};
+
+const boldChoice = {
+  name: 'isBold',
+  config: {
+    type: 'CheckboxControl',
+    label: t('Bold'),
+    renderTrigger: true,
+    default: isBold,
+    description: t('Whether label should be bold'),
+    visibility: ({ controls }: ControlPanelsContainerProps) => Boolean(controls?.show_label?.value),
+  },
+};
+
+const colorChoice = {
+  name: 'labelColor',
+  config: {
+    type: 'SelectControl',
+    label: t('Color'),
+    choices: [
+      ['red', 'Red'],
+      ['blue', 'Blue'],
+      ['green', 'Green'],
+      ['black', 'Black'],
+    ],
+    renderTrigger: true,
+    default: labelColor,
+    description: t('Select a color for the label'),
+    visibility: ({ controls }: ControlPanelsContainerProps) => Boolean(controls?.show_label?.value),
+  },
+};
+
+export const labelSection = [
+  [<h1 className="section-header">{t('Label')}</h1>],
+  [showLabelControl],
+  [labelChoice],
+  [boldChoice],
+  [colorChoice],
 ];

@@ -26,20 +26,25 @@ import {
 } from '@superset-ui/core';
 import {
   DEFAULT_LEGEND_FORM_DATA,
+  DEFAULT_LABEL_FORM_DATA,
   EchartsLegendFormData,
+  EchartsLabelFormData,
   LegendOrientation,
   LegendType,
 } from '../types';
 
 export type FormData = QueryFormData &
-  EchartsLegendFormData & {
+  EchartsLegendFormData &
+  EchartsLabelFormData & {
     colorScheme?: string;
     currentOwnValue?: string[] | null;
     defaultValue?: string[] | null;
     groupby: string[];
     metric: '';
     columns: string[];
-    stack: '';
+    stack: string;
+    zoom: boolean;
+    showNumber: boolean;
     numberFormat: string;
     dateFormat: string;
     showLabelsThreshold: number;
@@ -54,6 +59,7 @@ export interface ColumnChartProps extends ChartProps {
 // @ts-ignore
 export const DEFAULT_FORM_DATA: FormData = {
   ...DEFAULT_LEGEND_FORM_DATA,
+  ...DEFAULT_LABEL_FORM_DATA,
   groupby: [],
   legendOrientation: LegendOrientation.Top,
   legendType: LegendType.Scroll,

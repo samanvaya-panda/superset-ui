@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t } from '@superset-ui/core';
+import { t, validateNonEmpty } from '@superset-ui/core';
 import { ControlPanelConfig, sections } from '@superset-ui/chart-controls';
 import { DEFAULT_FORM_DATA } from './types';
-import { legendSection } from '../controls';
+import { legendSection, labelSection } from '../controls';
 
-const { stack } = DEFAULT_FORM_DATA;
+const { stack, zoom, showNumber } = DEFAULT_FORM_DATA;
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
@@ -65,11 +65,40 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [
+          {
+            name: 'zoom',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Zoom In'),
+              renderTrigger: true,
+              default: zoom,
+              description: t('Zoom in to view the bars better'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'show_number',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Number on bars'),
+              renderTrigger: true,
+              default: showNumber,
+              description: t('Show numbers on bars'),
+            },
+          },
+        ],
         ...legendSection,
+        ...labelSection,
       ],
     },
   ],
   controlOverrides: {
+    groupby: {
+      validators: [validateNonEmpty],
+    },
+
     row_limit: {
       default: 100,
     },
