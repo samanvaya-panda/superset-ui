@@ -31,7 +31,8 @@ export default function SankeyMultilabelChart({
   selectedValues,
   formData,
 }: TransformedProps) {
-  console.log(groupby);
+  // });
+
   const handleChange = useCallback(
     (values: string[]) => {
       if (!formData.emitFilter) {
@@ -79,6 +80,7 @@ export default function SankeyMultilabelChart({
     },
   };
 
+  console.log(eventHandlers);
   return (
     <Echart
       height={height}

@@ -20,25 +20,10 @@ import { buildQueryContext, QueryFormData } from '@superset-ui/core';
 
 export default function buildQuery(formData: QueryFormData) {
   const { metric, sort_by_metric } = formData;
-  // if()
-  return buildQueryContext(formData, baseQueryObject => {
-    const queries: any = [];
-    const groupbyLabels = formData.groupby || [];
-    if (groupbyLabels.length < 2) {
-      queries.push({
-        ...baseQueryObject,
-        ...(sort_by_metric && { orderby: [[metric, false]] }),
-      });
-    } else {
-      for (let i = 0; i < groupbyLabels.length - 1; i++) {
-        var tempGroupby = [groupbyLabels[i], groupbyLabels[i + 1]];
-        queries.push({
-          ...baseQueryObject,
-          groupby: tempGroupby,
-          ...(sort_by_metric && { orderby: [[metric, false]] }),
-        });
-      }
-    }
-    return queries;
-  });
+  return buildQueryContext(formData, baseQueryObject => [
+    {
+      ...baseQueryObject,
+      ...(sort_by_metric && { orderby: [[metric, false]] }),
+    },
+  ]);
 }

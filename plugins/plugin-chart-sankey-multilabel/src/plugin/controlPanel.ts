@@ -16,12 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t } from '@superset-ui/core';
+import { t, validateNonEmpty } from '@superset-ui/core';
 import { ControlPanelConfig, sections } from '@superset-ui/chart-controls';
-import { DEFAULT_FORM_DATA } from './types';
-import { legendSection } from '../controls';
-
-const { stack } = DEFAULT_FORM_DATA;
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
@@ -30,9 +26,9 @@ const config: ControlPanelConfig = {
       label: t('Query'),
       expanded: true,
       controlSetRows: [
+        ['groupby'],
         ['metric'],
         ['adhoc_filters'],
-        ['groupby'],
         ['row_limit'],
         ['color_scheme'],
         [
@@ -54,8 +50,9 @@ const config: ControlPanelConfig = {
       default: 100,
     },
     groupby: {
-      label: t('Source/Target'),
-      description: t('Source and Target labels for a multi-level Sankey diagram'),
+      label: t('Levels'),
+      validators: [validateNonEmpty],
+      description: t('Levels for a multi-level Sankey diagram(At-least 2)'),
     },
   },
 };
