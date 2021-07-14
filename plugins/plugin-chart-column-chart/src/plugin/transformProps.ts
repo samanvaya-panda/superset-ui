@@ -184,7 +184,7 @@ export default function transformProps(chartProps: ColumnChartProps): Transforme
   // console.log("data", transformedData[0].value);
   const selectedValues = (filterState.selectedValues || []).reduce(
     (acc: Record<string, number>, selectedValue: string) => {
-      const index = transformedData.findIndex(({ name }) => name === selectedValue);
+      const index = transformedData.findIndex((name: string) => name === selectedValue);
       return {
         ...acc,
         [index]: selectedValue,

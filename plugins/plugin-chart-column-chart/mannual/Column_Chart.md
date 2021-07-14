@@ -1,7 +1,7 @@
 # Building an Echart column chart plugin in Apache Superset
 
 This is a follow-up document to the [Hello World](https://preset.io/blog/2020-07-02-hello-world/)
-plugin blog. After creating the new plugin, the directory structure of `plugin-chart-hello-world`
+plugin blog. After creating the new plugin, the directory structure of `plugin-chart-column-chart`
 would look something like this:
 
 ```
@@ -9,7 +9,7 @@ would look something like this:
 ├── package.json
 ├── README.md
 ├── src
-│   ├── HelloWorld.tsx
+│   ├── ColumnChart.tsx
 │   ├── images
 │   │   └── thumbnail.png
 │   ├── index.ts
@@ -31,9 +31,9 @@ would look something like this:
 
 Before creating the column chart, we need to get some initial files from `plugin-chart-echarts`. Go
 to `plugin-chart-echarts/src` folder and copy all the files and folders to
-` plugin-chart-hello-world/src` except the folders corresponding to some chart name i.e BoxPlot,
+` plugin-chart-column-chart/src` except the folders corresponding to some chart name i.e BoxPlot,
 Funnel, etc(Folder names starting with caps). The resulting directory structure of
-`plugin-chart-hello-world/src` would become:
+`plugin-chart-column-chart/src` would become:
 
 ```
 src/
@@ -42,7 +42,7 @@ src/
 ├── constants.ts
 ├── controls.tsx
 ├── defaults.ts
-├── HelloWorld.tsx
+├── ColumnChart.tsx
 ├── images
 │   └── thumbnail.png
 ├── index.ts
