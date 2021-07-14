@@ -42,7 +42,7 @@ import {
 import { defaultGrid, defaultTooltip, defaultYAxis } from '../defaults';
 import {
   getPadding,
-  getTooltipFormatter,
+  getTooltipTimeFormatter,
   getXAxisFormatter,
   transformEventAnnotation,
   transformFormulaAnnotation,
@@ -109,6 +109,18 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
   const formatter = getNumberFormatter(contributionMode ? ',.0%' : yAxisFormat);
   const formatterSecondary = getNumberFormatter(contributionMode ? ',.0%' : yAxisFormatSecondary);
 
+  const primarySeries = new Set<string>();
+  const secondarySeries = new Set<string>();
+  const mapSeriesIdToAxis = (seriesOption: SeriesOption, index?: number): void => {
+    if (index === 1) {
+      secondarySeries.add(seriesOption.id as string);
+    } else {
+      primarySeries.add(seriesOption.id as string);
+    }
+  };
+  rawSeriesA.forEach(seriesOption => mapSeriesIdToAxis(seriesOption, yAxisIndex));
+  rawSeriesB.forEach(seriesOption => mapSeriesIdToAxis(seriesOption, yAxisIndexB));
+
   rawSeriesA.forEach(entry => {
     const transformedSeries = transformSeries(entry, colorScale, {
       area,
@@ -117,7 +129,6 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
       opacity,
       seriesType,
       stack,
-      richTooltip,
       yAxisIndex,
     });
     if (transformedSeries) series.push(transformedSeries);
@@ -130,7 +141,6 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
       opacity: opacityB,
       seriesType: seriesTypeB,
       stack: stackB,
-      richTooltip,
       yAxisIndex: yAxisIndexB,
     });
     if (transformedSeries) series.push(transformedSeries);
@@ -159,7 +169,7 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
     if (max === undefined) max = 1;
   }
 
-  const tooltipFormatter = getTooltipFormatter(tooltipTimeFormat);
+  const tooltipTimeFormatter = getTooltipTimeFormatter(tooltipTimeFormat);
   const xAxisFormatter = getXAxisFormatter(xAxisTimeFormat);
 
   const addYAxisLabelOffset = !!(yAxisTitle || yAxisTitleSecondary);
@@ -211,7 +221,7 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
         const value: number = !richTooltip ? params.value : params[0].value[0];
         const prophetValue = !richTooltip ? [params] : params;
 
-        const rows: Array<string> = [`${tooltipFormatter(value)}`];
+        const rows: Array<string> = [`${tooltipTimeFormatter(value)}`];
         const prophetValues: Record<string, ProphetValue> = extractProphetValuesFromTooltipParams(
           prophetValue,
         );
@@ -222,7 +232,7 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
             formatProphetTooltipSeries({
               ...value,
               seriesName: key,
-              formatter,
+              formatter: primarySeries.has(key) ? formatter : formatterSecondary,
             }),
           );
         });
