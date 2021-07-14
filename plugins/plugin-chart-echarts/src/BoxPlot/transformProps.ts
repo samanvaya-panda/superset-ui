@@ -30,8 +30,9 @@ import {
   BoxPlotQueryFormData,
   EchartsBoxPlotChartProps,
 } from './types';
-import { extractGroupbyLabel, getColtypesMapping } from '../utils/series';
+import { extractGroupbyLabel, getColtypesMapping, sanitizeHtml } from '../utils/series';
 import { defaultGrid, defaultTooltip, defaultYAxis } from '../defaults';
+import { OpacityEnum } from '../constants';
 
 export default function transformProps(
   chartProps: EchartsBoxPlotChartProps,
@@ -63,6 +64,7 @@ export default function transformProps(
       });
       return metricLabels.map(metric => {
         const name = metricLabels.length === 1 ? groupbyLabel : `${groupbyLabel}, ${metric}`;
+        const isFiltered = filterState.selectedValues && !filterState.selectedValues.includes(name);
         return {
           name,
           value: [
@@ -77,7 +79,7 @@ export default function transformProps(
           ],
           itemStyle: {
             color: colorFn(groupbyLabel),
-            opacity: 0.6,
+            opacity: isFiltered ? OpacityEnum.SemiTransparent : 0.6,
             borderColor: colorFn(groupbyLabel),
           },
         };
@@ -96,6 +98,7 @@ export default function transformProps(
         const name = metricLabels.length === 1 ? groupbyLabel : `${groupbyLabel}, ${metric}`;
         // Outlier data is a nested array of numbers (uncommon, therefore no need to add to DataRecordValue)
         const outlierDatum = (datum[`${metric}__outliers`] || []) as number[];
+        const isFiltered = filterState.selectedValues && !filterState.selectedValues.includes(name);
         return {
           name: 'outlier',
           type: 'scatter',
@@ -103,12 +106,15 @@ export default function transformProps(
           tooltip: {
             formatter: (param: { data: [string, number] }) => {
               const [outlierName, stats] = param.data;
-              const headline = groupby ? `<p><strong>${outlierName}</strong></p>` : '';
+              const headline = groupby
+                ? `<p><strong>${sanitizeHtml(outlierName)}</strong></p>`
+                : '';
               return `${headline}${numberFormatter(stats)}`;
             },
           },
           itemStyle: {
             color: colorFn(groupbyLabel),
+            opacity: isFiltered ? OpacityEnum.SemiTransparent : OpacityEnum.NonTransparent,
           },
         };
       }),
@@ -161,7 +167,7 @@ export default function transformProps(
             value: [number, number, number, number, number, number, number, number, number[]];
             name: string;
           } = param;
-          const headline = name ? `<p><strong>${name}</strong></p>` : '';
+          const headline = name ? `<p><strong>${sanitizeHtml(name)}</strong></p>` : '';
           const stats = [
             `Max: ${numberFormatter(value[5])}`,
             `3rd Quartile: ${numberFormatter(value[4])}`,
