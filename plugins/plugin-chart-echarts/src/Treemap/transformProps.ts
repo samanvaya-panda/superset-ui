@@ -40,7 +40,6 @@ import {
 import { formatSeriesName, getColtypesMapping } from '../utils/series';
 import { defaultTooltip } from '../defaults';
 import {
-  COLOR_ALPHA,
   COLOR_SATURATION,
   BORDER_WIDTH,
   GAP_WIDTH,
@@ -48,6 +47,7 @@ import {
   extractTreePathInfo,
   BORDER_COLOR,
 } from './constants';
+import { OpacityEnum } from '../constants';
 
 export function formatLabel({
   params,
@@ -169,10 +169,10 @@ export default function transformProps(
             columnsLabelMap.set(joinedName, path.concat(name));
             if (filterState.selectedValues && !filterState.selectedValues.includes(joinedName)) {
               item.itemStyle = {
-                colorAlpha: COLOR_ALPHA,
+                colorAlpha: OpacityEnum.SemiTransparent,
               };
               item.label = {
-                color: `rgba(0, 0, 0, ${COLOR_ALPHA})`,
+                color: `rgba(0, 0, 0, ${OpacityEnum.SemiTransparent})`,
               };
             }
             result.push(item);
@@ -205,7 +205,7 @@ export default function transformProps(
       colorSaturation: COLOR_SATURATION,
       itemStyle: {
         borderColor: BORDER_COLOR,
-        color: colorFn(`${child.name}_${depth}`),
+        color: colorFn(`${child.name}`),
         borderWidth: BORDER_WIDTH,
         gapWidth: GAP_WIDTH,
       },
@@ -248,10 +248,9 @@ export default function transformProps(
   const series: TreemapSeriesOption[] = [
     {
       type: 'treemap',
-      animation: false,
       width: '100%',
       height: '100%',
-      nodeClick: dashboardId ? undefined : 'zoomToNode',
+      nodeClick: undefined,
       roam: !dashboardId,
       breadcrumb: {
         show: false,

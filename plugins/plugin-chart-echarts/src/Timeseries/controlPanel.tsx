@@ -17,7 +17,13 @@
  * under the License.
  */
 import React from 'react';
-import { legacyValidateInteger, legacyValidateNumber, t } from '@superset-ui/core';
+import {
+  FeatureFlag,
+  isFeatureEnabled,
+  legacyValidateInteger,
+  legacyValidateNumber,
+  t,
+} from '@superset-ui/core';
 import {
   ControlPanelConfig,
   ControlPanelsContainerProps,
@@ -37,6 +43,7 @@ const {
   area,
   annotationLayers,
   contributionMode,
+  emitFilter,
   forecastEnabled,
   forecastInterval,
   forecastPeriods,
@@ -56,8 +63,6 @@ const {
   yAxisBounds,
   zoomable,
   xAxisLabelRotation,
-  xAxisShowMinLabel,
-  xAxisShowMaxLabel,
 } = DEFAULT_FORM_DATA;
 const config: ControlPanelConfig = {
   controlPanelSections: [
@@ -320,6 +325,20 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        isFeatureEnabled(FeatureFlag.DASHBOARD_CROSS_FILTERS)
+          ? [
+              {
+                name: 'emit_filter',
+                config: {
+                  type: 'CheckboxControl',
+                  label: t('Enable emitting filters'),
+                  default: emitFilter,
+                  renderTrigger: true,
+                  description: t('Enable emmiting filters.'),
+                },
+              },
+            ]
+          : [],
         ...legendSection,
         [<h1 className="section-header">{t('X Axis')}</h1>],
         [
@@ -331,30 +350,6 @@ const config: ControlPanelConfig = {
               description: `${D3_TIME_FORMAT_DOCS}. ${t(
                 'When using other than adaptive formatting, labels may overlap.',
               )}`,
-            },
-          },
-        ],
-        [
-          {
-            name: 'xAxisShowMinLabel',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Show Min Label'),
-              default: xAxisShowMinLabel,
-              renderTrigger: true,
-              description: t('Show Min Label'),
-            },
-          },
-        ],
-        [
-          {
-            name: 'xAxisShowMaxLabel',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Show Max Label'),
-              default: xAxisShowMaxLabel,
-              renderTrigger: true,
-              description: t('Show Max Label'),
             },
           },
         ],

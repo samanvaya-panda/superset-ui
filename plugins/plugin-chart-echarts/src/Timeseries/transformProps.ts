@@ -20,17 +20,22 @@
 import {
   AnnotationLayer,
   CategoricalColorNamespace,
-  ChartProps,
   getNumberFormatter,
   isEventAnnotationLayer,
   isFormulaAnnotationLayer,
   isIntervalAnnotationLayer,
   isTimeseriesAnnotationLayer,
   TimeseriesChartDataResponseResult,
+  DataRecordValue,
 } from '@superset-ui/core';
 import { EChartsOption, SeriesOption } from 'echarts';
-import { DEFAULT_FORM_DATA, EchartsTimeseriesFormData } from './types';
-import { EchartsProps, ForecastSeriesEnum, ProphetValue } from '../types';
+import {
+  DEFAULT_FORM_DATA,
+  EchartsTimeseriesChartProps,
+  EchartsTimeseriesFormData,
+  TimeseriesChartTransformedProps,
+} from './types';
+import { ForecastSeriesEnum, ProphetValue } from '../types';
 import { parseYAxisBound } from '../utils/controls';
 import { dedupSeries, extractTimeseriesSeries, getLegendProps } from '../utils/series';
 import { extractAnnotationLabels } from '../utils/annotation';
@@ -43,7 +48,7 @@ import {
 import { defaultGrid, defaultTooltip, defaultYAxis } from '../defaults';
 import {
   getPadding,
-  getTooltipFormatter,
+  getTooltipTimeFormatter,
   getXAxisFormatter,
   transformEventAnnotation,
   transformFormulaAnnotation,
@@ -53,8 +58,10 @@ import {
 } from './transformers';
 import { TIMESERIES_CONSTANTS } from '../constants';
 
-export default function transformProps(chartProps: ChartProps): EchartsProps {
-  const { width, height, formData, queriesData } = chartProps;
+export default function transformProps(
+  chartProps: EchartsTimeseriesChartProps,
+): TimeseriesChartTransformedProps {
+  const { width, height, formData, hooks, queriesData } = chartProps;
   const {
     annotation_data: annotationData_,
     data = [],
@@ -79,8 +86,6 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
     stack,
     truncateYAxis,
     yAxisFormat,
-    xAxisShowMinLabel,
-    xAxisShowMaxLabel,
     xAxisTimeFormat,
     yAxisBounds,
     yAxisTitle,
@@ -88,6 +93,8 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
     zoomable,
     richTooltip,
     xAxisLabelRotation,
+    emitFilter,
+    groupby,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
 
   const colorScale = CategoricalColorNamespace.getScale(colorScheme as string);
@@ -107,7 +114,6 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
       opacity,
       seriesType,
       stack,
-      richTooltip,
     });
     if (transformedSeries) series.push(transformedSeries);
   });
@@ -135,11 +141,22 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
     if (max === undefined) max = 1;
   }
 
-  const tooltipFormatter = getTooltipFormatter(tooltipTimeFormat);
+  const tooltipFormatter = getTooltipTimeFormatter(tooltipTimeFormat);
   const xAxisFormatter = getXAxisFormatter(xAxisTimeFormat);
+
+  const labelMap = series.reduce((acc: Record<string, DataRecordValue[]>, datum) => {
+    const name: string = datum.name as string;
+    return {
+      ...acc,
+      [name]: [name],
+    };
+  }, {});
+
+  const { setDataMask = () => {} } = hooks;
 
   const addYAxisLabelOffset = !!yAxisTitle;
   const padding = getPadding(showLegend, legendOrientation, addYAxisLabelOffset, zoomable);
+
   const echartOptions: EChartsOption = {
     useUTC: true,
     grid: {
@@ -149,8 +166,6 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
     xAxis: {
       type: 'time',
       axisLabel: {
-        showMinLabel: xAxisShowMinLabel,
-        showMaxLabel: xAxisShowMaxLabel,
         formatter: xAxisFormatter,
         rotate: xAxisLabelRotation,
       },
@@ -231,8 +246,13 @@ export default function transformProps(chartProps: ChartProps): EchartsProps {
   };
 
   return {
-    echartOptions,
+    formData,
     width,
     height,
+    echartOptions,
+    setDataMask,
+    emitFilter,
+    labelMap,
+    groupby,
   };
 }
