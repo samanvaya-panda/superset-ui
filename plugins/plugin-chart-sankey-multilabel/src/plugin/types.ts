@@ -24,15 +24,10 @@ import {
   QueryFormData,
   SetDataMaskHook,
 } from '@superset-ui/core';
-import {
-  DEFAULT_LEGEND_FORM_DATA,
-  EchartsLegendFormData,
-  LegendOrientation,
-  LegendType,
-} from '../types';
+import { DEFAULT_LABEL_FORM_DATA, EchartsLabelFormData } from '../types';
 
 export type FormData = QueryFormData &
-  EchartsLegendFormData & {
+  EchartsLabelFormData & {
     colorScheme?: string;
     currentOwnValue?: string[] | null;
     defaultValue?: string[] | null;
@@ -51,10 +46,8 @@ export interface SankeyMultilabelChartProps extends ChartProps {
 
 // @ts-ignore
 export const DEFAULT_FORM_DATA: FormData = {
-  ...DEFAULT_LEGEND_FORM_DATA,
+  ...DEFAULT_LABEL_FORM_DATA,
   groupby: [],
-  legendOrientation: LegendOrientation.Top,
-  legendType: LegendType.Scroll,
   numberFormat: 'SMART_NUMBER',
   showLabelsThreshold: 5,
   emitFilter: false,

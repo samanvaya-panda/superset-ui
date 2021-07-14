@@ -17,7 +17,6 @@
  * under the License.
  */
 import { EChartsOption } from 'echarts';
-import { TooltipMarker } from 'echarts/types/src/util/format';
 
 export type EchartsStylesProps = {
   height: number;
@@ -33,50 +32,18 @@ export interface EchartsProps {
   forceClear?: boolean;
 }
 
-export enum ForecastSeriesEnum {
-  Observation = '',
-  ForecastTrend = '__yhat',
-  ForecastUpper = '__yhat_upper',
-  ForecastLower = '__yhat_lower',
-}
-
-export type ForecastSeriesContext = {
-  name: string;
-  type: ForecastSeriesEnum;
+export type EchartsLabelFormData = {
+  showLabel: boolean;
+  labelName: string;
+  isBold: boolean;
+  labelColor: string;
 };
 
-export enum LegendOrientation {
-  Top = 'top',
-  Bottom = 'bottom',
-  Left = 'left',
-  Right = 'right',
-}
-
-export enum LegendType {
-  Scroll = 'scroll',
-  Plain = 'plain',
-}
-
-export type ProphetValue = {
-  marker: TooltipMarker;
-  observation?: number;
-  forecastTrend?: number;
-  forecastLower?: number;
-  forecastUpper?: number;
-};
-
-export type EchartsLegendFormData = {
-  legendMargin: number | null | string;
-  legendOrientation: LegendOrientation;
-  legendType: LegendType;
-  showLegend: boolean;
-};
-
-export const DEFAULT_LEGEND_FORM_DATA: EchartsLegendFormData = {
-  legendMargin: null,
-  legendOrientation: LegendOrientation.Top,
-  legendType: LegendType.Scroll,
-  showLegend: false,
+export const DEFAULT_LABEL_FORM_DATA: EchartsLabelFormData = {
+  showLabel: false,
+  labelName: '',
+  isBold: false,
+  labelColor: 'red',
 };
 
 export type EventHandlers = Record<string, { (props: any): void }>;

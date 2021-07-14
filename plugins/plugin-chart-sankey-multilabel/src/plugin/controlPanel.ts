@@ -18,6 +18,7 @@
  */
 import { t, validateNonEmpty } from '@superset-ui/core';
 import { ControlPanelConfig, sections } from '@superset-ui/chart-controls';
+import { labelSection } from '../controls';
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
@@ -30,7 +31,6 @@ const config: ControlPanelConfig = {
         ['metric'],
         ['adhoc_filters'],
         ['row_limit'],
-        ['color_scheme'],
         [
           {
             name: 'sort_by_metric',
@@ -43,6 +43,11 @@ const config: ControlPanelConfig = {
           },
         ],
       ],
+    },
+    {
+      label: t('Chart Options'),
+      expanded: true,
+      controlSetRows: [['color_scheme'], ...labelSection],
     },
   ],
   controlOverrides: {

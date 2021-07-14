@@ -26,10 +26,8 @@ import {
   TimeFormatter,
   TimeseriesDataRecord,
 } from '@superset-ui/core';
-import { LegendComponentOption, SeriesOption } from 'echarts';
+import { SeriesOption } from 'echarts';
 import { NULL_STRING, TIMESERIES_CONSTANTS } from '../constants';
-import { LegendOrientation, LegendType } from '../types';
-import { defaultLegendPadding } from '../defaults';
 
 function isDefined<T>(value: T | undefined | null): boolean {
   return value !== undefined && value !== null;
@@ -121,68 +119,6 @@ export function extractGroupbyLabel({
       }),
     )
     .join(', ');
-}
-
-export function getLegendProps(
-  type: LegendType,
-  orientation: LegendOrientation,
-  show: boolean,
-  zoomable = false,
-): LegendComponentOption | LegendComponentOption[] {
-  const legend: LegendComponentOption | LegendComponentOption[] = {
-    orient: [LegendOrientation.Top, LegendOrientation.Bottom].includes(orientation)
-      ? 'horizontal'
-      : 'vertical',
-    show,
-    type,
-  };
-  switch (orientation) {
-    case LegendOrientation.Left:
-      legend.left = 0;
-      break;
-    case LegendOrientation.Right:
-      legend.right = 0;
-      legend.top = zoomable ? TIMESERIES_CONSTANTS.legendRightTopOffset : 0;
-      break;
-    case LegendOrientation.Bottom:
-      legend.bottom = 0;
-      break;
-    case LegendOrientation.Top:
-    default:
-      legend.top = 0;
-      legend.right = zoomable ? TIMESERIES_CONSTANTS.legendTopRightOffset : 0;
-      break;
-  }
-  return legend;
-}
-
-export function getChartPadding(
-  show: boolean,
-  orientation: LegendOrientation,
-  margin?: string | number | null,
-  padding?: { top?: number; bottom?: number; left?: number; right?: number },
-): {
-  bottom: number;
-  left: number;
-  right: number;
-  top: number;
-} {
-  let legendMargin;
-  if (!show) {
-    legendMargin = 0;
-  } else if (margin === null || margin === undefined || typeof margin === 'string') {
-    legendMargin = defaultLegendPadding[orientation];
-  } else {
-    legendMargin = margin;
-  }
-
-  const { bottom = 0, left = 0, right = 0, top = 0 } = padding || {};
-  return {
-    left: left + (orientation === LegendOrientation.Left ? legendMargin : 0),
-    right: right + (orientation === LegendOrientation.Right ? legendMargin : 0),
-    top: top + (orientation === LegendOrientation.Top ? legendMargin : 0),
-    bottom: bottom + (orientation === LegendOrientation.Bottom ? legendMargin : 0),
-  };
 }
 
 export function dedupSeries(series: SeriesOption[]): SeriesOption[] {

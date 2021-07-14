@@ -29,14 +29,8 @@ import {
   FormData,
   TransformedProps,
 } from './types';
-import { DEFAULT_LEGEND_FORM_DATA } from '../types';
-import {
-  extractGroupbyLabel,
-  getChartPadding,
-  getColtypesMapping,
-  getLegendProps,
-} from '../utils/series';
-import { defaultGrid, defaultTooltip } from '../defaults';
+import { DEFAULT_LABEL_FORM_DATA } from '../types';
+import { extractGroupbyLabel, getColtypesMapping } from '../utils/series';
 
 // function transfromGroupBy(groupby: string[]){
 //   console.log('groupby', groupby);
@@ -49,6 +43,27 @@ import { defaultGrid, defaultTooltip } from '../defaults';
 //   return groupbyArray;
 // }
 
+function customizeLabel(
+  labels: any[],
+  unqLabels: string[],
+  labelColor: string,
+  isBold: boolean = false,
+) {
+  labels.forEach(nodelabel => {
+    unqLabels.forEach(newLabel => {
+      if (nodelabel.name === newLabel) {
+        let labelStyle = {
+          color: labelColor,
+          fontSize: 15,
+          fontWeight: 'normal',
+        };
+        if (isBold) labelStyle.fontWeight = 'bold';
+        nodelabel.label = labelStyle;
+      }
+    });
+  });
+}
+
 export default function transformProps(chartProps: SankeyMultilabelChartProps) {
   const { formData, height, hooks, queriesData, width } = chartProps;
   const { data = [] } = queriesData[0];
@@ -59,30 +74,14 @@ export default function transformProps(chartProps: SankeyMultilabelChartProps) {
     groupby,
     metric = '',
     dateFormat,
-    // showLabels,
-    showLegend,
-    // showLabelsThreshold,
+    showLabel,
+    isBold,
+    labelName,
+    labelColor,
     emitFilter,
-  }: FormData = { ...DEFAULT_LEGEND_FORM_DATA, ...DEFAULT_COLUMN_FORM_DATA, ...formData };
+  }: FormData = { ...DEFAULT_LABEL_FORM_DATA, ...DEFAULT_COLUMN_FORM_DATA, ...formData };
 
   const metricLabel = getMetricLabel(metric);
-
-  // const groupbyArray = transfromGroupBy(groupby);
-  // console.log(groupbyArray);
-  // const labelName :string[] = [];
-  // const labelMap = data.reduce((acc: Record<string, DataRecordValue[]>, datum) => {
-  //     const label = extractGroupbyLabel({
-  //       datum,
-  //       groupby,
-  //       coltypeMapping,
-  //       timeFormatter: getTimeFormatter(dateFormat),
-  //     });
-  //     return {
-  //       ...acc,
-  //       [label]: groupby.map(col => datum[col]),
-  //     };
-  //   }, {}
-  //   );
   const colorFn = CategoricalColorNamespace.getScale(colorScheme as string);
 
   const labelMap: any = {};
@@ -117,6 +116,7 @@ export default function transformProps(chartProps: SankeyMultilabelChartProps) {
           itemStyle: {
             color: colorFn(labelArray[i + 1] as string),
           },
+          label: {},
         });
         values[labelArray[i + 1]] = 0;
       }
@@ -150,6 +150,10 @@ export default function transformProps(chartProps: SankeyMultilabelChartProps) {
     edge.targetPercent = (100 * edge.value) / targetVal;
   });
 
+  if (showLabel && labelName) {
+    const unqLabels = labelName.split('; ');
+    customizeLabel(labels, unqLabels, labelColor, isBold);
+  }
   // console.log(values, edges);
   // }
   // catch(error){
@@ -169,16 +173,11 @@ export default function transformProps(chartProps: SankeyMultilabelChartProps) {
         let data = params.data;
         if (data.name === undefined) {
           let name = '<p>' + 'Path Value: ' + data.value + '</p>';
-          // let name = '<p>' + data.source + ' -- ' + data.target + '&emsp;' +'<b>'+data.value+'</b>' +'</p>';
-          let sourcePercent = '<p>' + data.sourcePercent + '% of ' + data.source + '<p>';
-          // let sourcePercent = '<p>' + '<b>'+data.sourcePercent+'</b>' + '<p>';
-          let targetPercent = '<p>' + data.targetPercent + '% of ' + data.target + '<p>';
-          // let targetPercent = '<p>' + '<b>'+data.targetPercent+'</b>' + '<p>';
+          let sourcePercent = '<p>' + data.sourcePercent.toFixed(1) + '% of ' + data.source + '<p>';
+          let targetPercent = '<p>' + data.targetPercent.toFixed(1) + '% of ' + data.target + '<p>';
           return name + sourcePercent + targetPercent;
-          // return name;
         } else {
           let name = '<p>' + params.name + '&emsp;' + params.value + '</p>';
-          // let name = '<p>' + params.name + '&emsp;' +'<b>' + params.value + '</b></p>';
           return name;
         }
       },
@@ -190,6 +189,19 @@ export default function transformProps(chartProps: SankeyMultilabelChartProps) {
       },
       data: labels,
       links: edges,
+      top: '1%',
+      left: '1%',
+      right: '1%',
+      bottom: '1%',
+
+      levels: [
+        {
+          depth: groupby.length - 1,
+          label: {
+            position: 'left',
+          },
+        },
+      ],
     },
   };
   var selectedValues: any;
