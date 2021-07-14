@@ -1,39 +1,13 @@
-# Building an Echart column chart plugin in Apache Superset
+# Creating a Multi-label Sankey diagram using Echarts in Superset
 
-This is a follow-up document to the [Hello World](https://preset.io/blog/2020-07-02-hello-world/)
-plugin blog. After creating the new plugin, the directory structure of `plugin-chart-column-chart`
-would look something like this:
+The Sankey diagram provided in the superset supports only two labels/attributes(source and target).
+For practical reasons, we might need to visualise the dataset on more than two labels/attributes.
+So, we are going to create a sankey digram using Echarts that supports mulitiple labels and has some
+additional functionalities too. Let's get started.
 
-```
-.
-├── package.json
-├── README.md
-├── src
-│   ├── ColumnChart.tsx
-│   ├── images
-│   │   └── thumbnail.png
-│   ├── index.ts
-│   ├── plugin
-│   │   ├── buildQuery.ts
-│   │   ├── controlPanel.ts
-│   │   ├── index.ts
-│   │   └── transformProps.ts
-│   └── types.ts
-├── test
-│   ├── index.test.ts
-│   └── plugin
-│       ├── buildQuery.test.ts
-│       └── transformProps.test.ts
-├── tsconfig.json
-└── types
-    └── external.d.ts
-```
-
-Before creating the column chart, we need to get some initial files from `plugin-chart-echarts`. Go
-to `plugin-chart-echarts/src` folder and copy all the files and folders to
-` plugin-chart-column-chart/src` except the folders corresponding to some chart name i.e BoxPlot,
-Funnel, etc(Folder names starting with caps). The resulting directory structure of
-`plugin-chart-column-chart/src` would become:
+Create a new plugin for `Sankey Multilabel` using the `yoman generator` and copy some of the files
+from `echarts` plugin as done for the `Column Chart`. The directory structure should look something
+like this:
 
 ```
 src/
@@ -42,7 +16,7 @@ src/
 ├── constants.ts
 ├── controls.tsx
 ├── defaults.ts
-├── ColumnChart.tsx
+├── SankeyMultilabel.tsx
 ├── images
 │   └── thumbnail.png
 ├── index.ts
@@ -57,100 +31,6 @@ src/
     ├── controls.ts
     ├── prophet.ts
     └── series.ts
-```
-
-Now, to build the column chart plugin, we would only require to make changes in the `src` folder. We
-are going to create a column chart with minimal features such as single metric, group by, single
-breakdown, legends and stacking parallel bars. These features are defined in
-`src/plugin/ContolPanel.tsx`. We start by importing and defining some of the required modules and
-variables:
-
-```ts
-import { t } from '@superset-ui/core';
-import { ControlPanelConfig, sections } from '@superset-ui/chart-controls';
-import { DEFAULT_FORM_DATA } from './types';
-import { legendSection } from '../controls';
-const { stack } = DEFAULT_FORM_DATA;
-```
-
-Next we define the controls that are going to appear in superset for our chart(metric, group by,
-breakdown, etc) and finally we export them:
-
-```ts
-const config: ControlPanelConfig = {
-  controlPanelSections: [
-    sections.legacyTimeseriesTime,
-    {
-      label: t('Query'),
-      expanded: true,
-      controlSetRows: [
-        ['metric'],
-        ['adhoc_filters'],
-        ['groupby'],
-        ['columns'],
-        ['row_limit'],
-        [
-          {
-            name: 'sort_by_metric',
-            config: {
-              default: true,
-              type: 'CheckboxControl',
-              label: t('Sort by metric'),
-              description: t('Whether to sort results by the selected metric in descending order.'),
-            },
-          },
-        ],
-      ],
-    },
-    {
-      label: t('Chart Options'),
-      expanded: true,
-      controlSetRows: [
-        ['color_scheme'],
-        [
-          {
-            name: 'stack',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Stack series'),
-              renderTrigger: true,
-              default: stack,
-              description: t('Stack series on top of each other'),
-            },
-          },
-        ],
-        ...legendSection,
-      ],
-    },
-  ],
-  controlOverrides: {
-    row_limit: {
-      default: 100,
-    },
-    columns: {
-      label: t('Breakdowns'),
-      description: t('Defines how each series is broken down'),
-    },
-  },
-};
-export default config;
-```
-
-Next, we need to define how we would query data for different features in the superset. For this, we
-set up `src/plugin/buildQuery.ts` as:
-
-```ts
-import { buildQueryContext, QueryFormData } from '@superset-ui/core';
-
-export default function buildQuery(formData: QueryFormData) {
-  const { metric, sort_by_metric } = formData;
-  return buildQueryContext(formData, baseQueryObject => [
-    {
-      ...baseQueryObject,
-      ...(sort_by_metric && { orderby: [[metric, false]] }),
-    },
-  ]);
-}
 ```
 
 Next we need to modify the `transformProps.ts` file to manage the rendering of different features in

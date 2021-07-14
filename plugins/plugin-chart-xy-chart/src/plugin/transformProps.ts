@@ -22,14 +22,14 @@ import {
   getMetricLabel,
   getTimeFormatter,
 } from '@superset-ui/core';
-import { EChartsOption, BarSeriesOption, DataZoomComponentOption } from 'echarts';
+import { EChartsOption, LineSeriesOption } from 'echarts';
 import {
-  DEFAULT_FORM_DATA as DEFAULT_COLUMN_FORM_DATA,
-  ColumnChartProps,
+  DEFAULT_FORM_DATA as DEFAULT_XY_FORM_DATA,
+  XYChartProps,
   FormData,
   TransformedProps,
 } from './types';
-import { DEFAULT_LEGEND_FORM_DATA, DEFAULT_LABEL_FORM_DATA } from '../types';
+import { DEFAULT_LEGEND_FORM_DATA, DEFAULT_OPTION_FORM_DATA } from '../types';
 import {
   extractGroupbyLabel,
   getChartPadding,
@@ -37,6 +37,7 @@ import {
   getLegendProps,
 } from '../utils/series';
 import { defaultGrid, defaultTooltip } from '../defaults';
+import { formatOptions } from './formatOptions';
 
 function parseRichLabel(value: string) {
   const splitArray = value.split(', ');
@@ -52,7 +53,7 @@ function parseLabel(value: DataRecordValue[] | string[], sep: string = ', ') {
   return parsedString;
 }
 
-export default function transformProps(chartProps: ColumnChartProps): TransformedProps {
+export default function transformProps(chartProps: XYChartProps): TransformedProps {
   const { formData, height, hooks, queriesData, filterState, width } = chartProps;
   const { data = [] } = queriesData[0];
   const coltypeMapping = getColtypesMapping(queriesData[0]);
@@ -63,23 +64,17 @@ export default function transformProps(chartProps: ColumnChartProps): Transforme
     legendMargin,
     legendOrientation,
     legendType,
-    metric = '',
-    stack,
-    columns,
-    dateFormat,
-    // showLabels,
     showLegend,
-    showLabel,
-    labelName,
-    isBold,
-    labelColor,
+    metric = '',
+    columns,
+    optionEditor,
     emitFilter,
-    zoom,
+    dateFormat,
     showNumber,
   }: FormData = {
     ...DEFAULT_LEGEND_FORM_DATA,
-    ...DEFAULT_LABEL_FORM_DATA,
-    ...DEFAULT_COLUMN_FORM_DATA,
+    ...DEFAULT_OPTION_FORM_DATA,
+    ...DEFAULT_XY_FORM_DATA,
     ...formData,
   };
 
@@ -99,8 +94,10 @@ export default function transformProps(chartProps: ColumnChartProps): Transforme
   }, {});
 
   const keys = Object.keys(labelMap);
+  var axisLabel: any = [];
   var seriesLabel: any = {};
   keys.forEach((key, index) => {
+    axisLabel.push({ value: key });
     seriesLabel[key] = index;
   });
   // console.log('seriesLabel', seriesLabel);
@@ -112,22 +109,22 @@ export default function transformProps(chartProps: ColumnChartProps): Transforme
     rich: {},
   };
 
-  // console.log("labelName", labelName);
-  if (labelName && showLabel) {
-    var richText: any = {};
-    var unq_labels = labelName.split('; ');
-    unq_labels.forEach(label => {
-      richText[label] = {
-        fontSize: 15,
-        color: labelColor,
-      };
-      if (isBold) richText[label]['fontWeight'] = 'bold';
-    });
+  // // console.log("labelName", labelName);
+  // if (labelName && showLabel) {
+  //   var richText: any = {};
+  //   var unq_labels = labelName.split('; ');
+  //   unq_labels.forEach(label => {
+  //     richText[label] = {
+  //       fontSize: 15,
+  //       color: labelColor,
+  //     };
+  //     if (isBold) richText[label]['fontWeight'] = 'bold';
+  //   });
 
-    richLabels.rich = richText;
-  }
-  // console.log("richLabels", richLabels);
-  // console.log("labelMap", Object.keys(labelMap));
+  //   richLabels.rich = richText;
+  // }
+  // // console.log("richLabels", richLabels);
+  // // console.log("labelMap", Object.keys(labelMap));
 
   const breakdownMap: string[] = [];
   if (columns.length) {
@@ -148,7 +145,7 @@ export default function transformProps(chartProps: ColumnChartProps): Transforme
 
   var transformedData: any = {};
   if (columns.length === 0) {
-    const transformData: BarSeriesOption[] = data.map(datum => {
+    const transformData: LineSeriesOption[] = data.map(datum => {
       const name = extractGroupbyLabel({
         datum,
         groupby,
@@ -179,7 +176,6 @@ export default function transformProps(chartProps: ColumnChartProps): Transforme
     });
     transformedData = transformData;
   }
-
   // var selectedValues: any;
   // console.log("data", transformedData[0].value);
   const selectedValues = (filterState.selectedValues || []).reduce(
@@ -195,7 +191,7 @@ export default function transformProps(chartProps: ColumnChartProps): Transforme
 
   // console.log('transformedData', transformedData);
   // console.log('selectedValue', selectedValues);
-  const series: BarSeriesOption[] = [];
+  const series: LineSeriesOption[] = [];
   var legendData: any = [];
 
   if (columns.length) {
@@ -206,20 +202,11 @@ export default function transformProps(chartProps: ColumnChartProps): Transforme
         itemStyle: {
           color: colorFn(key),
         },
-        type: 'bar',
+        type: 'line',
         ...getChartPadding(showLegend, legendOrientation, legendMargin),
         animation: false,
-        stack,
         label: {
           show: showNumber,
-        },
-        emphasis: {
-          // label: {
-          //   show: true,
-          //   fontWeight: 'bold',
-          //   backgroundColor: 'white',
-          // },
-          // focus:'series',
         },
         data: transformedData[key],
       });
@@ -228,66 +215,56 @@ export default function transformProps(chartProps: ColumnChartProps): Transforme
   } else {
     series.push({
       name: metricLabel,
-      type: 'bar',
+      type: 'line',
       ...getChartPadding(showLegend, legendOrientation, legendMargin),
       animation: false,
-      stack,
       label: {
         show: showNumber,
-      },
-      emphasis: {
-        // label: {
-        //   show: true,
-        //   fontWeight: 'bold',
-        //   backgroundColor: 'white',
-        // },
-        // focus:'series',
       },
       data: transformedData,
     });
     legendData = [metricLabel];
   }
 
-  // console.log('legend', legendData);
-  // console.log('series', series);
+  // // console.log('legend', legendData);
+  // // console.log('series', series);
 
-  const zoomIn: DataZoomComponentOption[] = [];
-  if (zoom) {
-    zoomIn.push(
-      {
-        id: 'dataZoomX',
-        type: 'slider',
-        xAxisIndex: [0],
-        filterMode: 'filter',
-      },
-      {
-        id: 'dataZoomY',
-        type: 'slider',
-        yAxisIndex: [0],
-        filterMode: 'empty',
-      },
-    );
-  }
+  // const zoomIn: DataZoomComponentOption[] = [];
+  // if (zoom) {
+  //   zoomIn.push(
+  //     {
+  //       id: 'dataZoomX',
+  //       type: 'slider',
+  //       xAxisIndex: [0],
+  //       filterMode: 'filter',
+  //     },
+  //     {
+  //       id: 'dataZoomY',
+  //       type: 'slider',
+  //       yAxisIndex: [0],
+  //       filterMode: 'empty',
+  //     },
+  //   );
+  // }
 
   const echartOptions: EChartsOption = {
-    dataZoom: zoomIn,
     grid: {
       ...defaultGrid,
     },
     tooltip: {
       ...defaultTooltip,
-      trigger: 'axis',
+      trigger: 'item',
       axisPointer: {
         type: 'shadow',
       },
     },
     xAxis: {
-      type: 'value',
+      type: 'category',
+      data: axisLabel,
     },
     yAxis: {
-      type: 'category',
-      data: keys,
-      axisLabel: richLabels,
+      type: 'value',
+      // axisLabel: richLabels,
     },
     legend: {
       ...getLegendProps(legendType, legendOrientation, showLegend),
@@ -297,12 +274,13 @@ export default function transformProps(chartProps: ColumnChartProps): Transforme
   };
 
   // console.log(echartOptions);
+  const echartFinalOptions = formatOptions(optionEditor, echartOptions);
 
   return {
     formData,
     width,
     height,
-    echartOptions,
+    echartFinalOptions,
     setDataMask,
     emitFilter,
     labelMap,
