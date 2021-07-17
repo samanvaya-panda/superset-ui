@@ -31,6 +31,7 @@ import {
   TimeFormats,
   TimeFormatter,
 } from '@superset-ui/core';
+import { getColorFormatters } from '@superset-ui/chart-controls';
 
 import isEqualColumns from './utils/isEqualColumns';
 import DateWithFormatter from './utils/DateWithFormatter';
@@ -186,7 +187,7 @@ const transformProps = (chartProps: TableChartProps): TableChartTransformedProps
     width,
     rawFormData: formData,
     queriesData = [],
-    initialValues: filters = {},
+    filterState,
     ownState: serverPaginationData = {},
     hooks: { onAddFilter: onChangeFilter, setDataMask = () => {} },
   } = chartProps;
@@ -203,6 +204,7 @@ const transformProps = (chartProps: TableChartProps): TableChartTransformedProps
     order_desc: sortDesc = false,
     query_mode: queryMode,
     show_totals: showTotals,
+    conditional_formatting: conditionalFormatting,
   } = formData;
 
   const [metrics, percentMetrics, columns] = processColumns(chartProps);
@@ -220,6 +222,7 @@ const transformProps = (chartProps: TableChartProps): TableChartTransformedProps
   }
   const data = processDataRecords(baseQuery?.data, columns);
   const totals = showTotals && queryMode === QueryMode.aggregate ? totalQuery?.data[0] : undefined;
+  const columnColorFormatters = getColorFormatters(conditionalFormatting, data) ?? [];
 
   return {
     height,
@@ -242,9 +245,10 @@ const transformProps = (chartProps: TableChartProps): TableChartTransformedProps
     pageSize: serverPagination
       ? serverPageLength
       : getPageSize(pageLength, data.length, columns.length),
-    filters,
+    filters: filterState.filters,
     emitFilter: tableFilter,
     onChangeFilter,
+    columnColorFormatters,
   };
 };
 

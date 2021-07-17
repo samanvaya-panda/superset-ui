@@ -1,6 +1,6 @@
 {
   "name": "@superset-ui/plugin-chart-table",
-  "version": "0.17.64",
+  "version": "0.17.67",
   "description": "Superset Chart - Table",
   "main": "lib/index.js",
   "module": "esm/index.js",
@@ -26,7 +26,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@superset-ui/chart-controls": "0.17.64",
+    "@react-icons/all-files": "^4.1.0",
+    "@superset-ui/chart-controls": "0.17.67",
     "@superset-ui/core": "0.17.64",
     "@types/d3-array": "^2.9.0",
     "@types/react-table": "^7.0.29",
@@ -40,7 +41,6 @@
   "peerDependencies": {
     "@types/react": "*",
     "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-icons": "^4.2.0"
+    "react-dom": "^16.13.1"
   }
 }
