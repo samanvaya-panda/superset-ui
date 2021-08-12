@@ -20,6 +20,7 @@ import * as sectionsModule from './sections';
 
 export * from './utils';
 export * from './constants';
+export * from './operators';
 
 // can't do `export * as sections from './sections'`, babel-transformer will fail
 export const sections = sectionsModule;
@@ -32,5 +33,6 @@ export * from './components/MetricOption';
 // React control components
 export { default as sharedControls } from './shared-controls';
 export { default as sharedControlComponents } from './shared-controls/components';
+export * from './shared-controls/emitFilterControl';
 export * from './shared-controls/components';
 export * from './types';

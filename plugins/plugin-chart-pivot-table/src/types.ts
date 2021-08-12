@@ -25,12 +25,14 @@ import {
   JsonObject,
   TimeFormatter,
   NumberFormatter,
+  QueryFormMetric,
 } from '@superset-ui/core';
 import { ColorFormatters } from '@superset-ui/chart-controls';
 
 export interface PivotTableStylesProps {
   height: number;
   width: number;
+  margin: number;
 }
 
 export type FilterType = Record<string, DataRecordValue>;
@@ -65,6 +67,8 @@ interface PivotTableCustomizeProps {
   metricsLayout?: MetricsLayoutEnum;
   metricColorFormatters: ColorFormatters;
   dateFormatters: Record<string, DateFormatter | undefined>;
+  timeseries_limit_metric: QueryFormMetric[] | QueryFormMetric | null;
+  order_desc: boolean;
 }
 
 export type PivotTableQueryFormData = QueryFormData &

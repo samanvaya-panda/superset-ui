@@ -190,7 +190,7 @@ export interface BaseControlConfig<
    */
   mapStateToProps?: (
     state: ControlPanelState,
-    controlState: this & ExtraControlProps,
+    controlState: ControlState,
     // TODO: add strict `chartState` typing (see superset-frontend/src/explore/types)
     chartState?: AnyDict,
   ) => ExtraControlProps;
@@ -325,6 +325,7 @@ export type SectionOverrides = {
 // Ref:
 //  - superset-frontend/src/explore/components/ConditionalFormattingControl.tsx
 export enum COMPARATOR {
+  NONE = 'None',
   GREATER_THAN = '>',
   LESS_THAN = '<',
   GREATER_OR_EQUAL = '≥',

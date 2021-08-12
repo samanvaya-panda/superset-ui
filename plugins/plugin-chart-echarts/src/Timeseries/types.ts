@@ -20,13 +20,10 @@ import {
   AnnotationLayer,
   ChartDataResponseResult,
   ChartProps,
-  DataRecordValue,
   QueryFormData,
-  SetDataMaskHook,
   TimeGranularity,
 } from '@superset-ui/core';
-import { EChartsOption } from 'echarts';
-import { DEFAULT_LEGEND_FORM_DATA, EchartsLegendFormData } from '../types';
+import { DEFAULT_LEGEND_FORM_DATA, EchartsLegendFormData, EChartTransformedProps } from '../types';
 
 export enum EchartsTimeseriesContributionType {
   Row = 'row',
@@ -77,6 +74,7 @@ export type EchartsTimeseriesFormData = QueryFormData & {
   xAxisLabelRotation: number;
   emitFilter: boolean;
   groupby: string[];
+  showValue: boolean;
 } & EchartsLegendFormData;
 
 // @ts-ignore
@@ -108,6 +106,7 @@ export const DEFAULT_FORM_DATA: EchartsTimeseriesFormData = {
   emitFilter: false,
   groupby: [],
   yAxisTitle: '',
+  showValue: false,
 };
 
 export interface EchartsTimeseriesChartProps extends ChartProps {
@@ -115,13 +114,4 @@ export interface EchartsTimeseriesChartProps extends ChartProps {
   queriesData: ChartDataResponseResult[];
 }
 
-export interface TimeseriesChartTransformedProps {
-  formData: EchartsTimeseriesFormData;
-  height: number;
-  width: number;
-  echartOptions: EChartsOption;
-  emitFilter: boolean;
-  setDataMask: SetDataMaskHook;
-  labelMap: Record<string, DataRecordValue[]>;
-  groupby: string[];
-}
+export type TimeseriesChartTransformedProps = EChartTransformedProps<EchartsTimeseriesFormData>;

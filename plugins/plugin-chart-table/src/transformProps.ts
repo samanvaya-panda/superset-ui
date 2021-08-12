@@ -198,7 +198,7 @@ const transformProps = (chartProps: TableChartProps): TableChartTransformedProps
     show_cell_bars: showCellBars = true,
     include_search: includeSearch = false,
     page_length: pageLength,
-    table_filter: tableFilter,
+    emit_filter: emitFilter,
     server_pagination: serverPagination = false,
     server_page_length: serverPageLength = 10,
     order_desc: sortDesc = false,
@@ -206,6 +206,7 @@ const transformProps = (chartProps: TableChartProps): TableChartTransformedProps
     show_totals: showTotals,
     conditional_formatting: conditionalFormatting,
   } = formData;
+  const timeGrain = extractTimegrain(formData);
 
   const [metrics, percentMetrics, columns] = processColumns(chartProps);
 
@@ -246,9 +247,10 @@ const transformProps = (chartProps: TableChartProps): TableChartTransformedProps
       ? serverPageLength
       : getPageSize(pageLength, data.length, columns.length),
     filters: filterState.filters,
-    emitFilter: tableFilter,
+    emitFilter,
     onChangeFilter,
     columnColorFormatters,
+    timeGrain,
   };
 };
 

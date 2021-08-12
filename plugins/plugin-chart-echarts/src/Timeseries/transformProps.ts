@@ -61,7 +61,7 @@ import { TIMESERIES_CONSTANTS } from '../constants';
 export default function transformProps(
   chartProps: EchartsTimeseriesChartProps,
 ): TimeseriesChartTransformedProps {
-  const { width, height, formData, hooks, queriesData } = chartProps;
+  const { width, height, filterState, formData, hooks, queriesData } = chartProps;
   const {
     annotation_data: annotationData_,
     data = [],
@@ -95,6 +95,7 @@ export default function transformProps(
     xAxisLabelRotation,
     emitFilter,
     groupby,
+    showValue,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
 
   const colorScale = CategoricalColorNamespace.getScale(colorScheme as string);
@@ -105,18 +106,59 @@ export default function transformProps(
   const series: SeriesOption[] = [];
   const formatter = getNumberFormatter(contributionMode ? ',.0%' : yAxisFormat);
 
+  const totalStackedValues: number[] = [];
+  const showValueIndexes: number[] = [];
+
+  if (stack) {
+    rebasedData.forEach(data => {
+      const values = Object.keys(data).reduce((prev, curr) => {
+        if (curr === '__timestamp') {
+          return prev;
+        }
+        const value = data[curr] || 0;
+        return prev + (value as number);
+      }, 0);
+      totalStackedValues.push(values);
+    });
+
+    rawSeries.forEach((entry, seriesIndex) => {
+      const { data = [] } = entry;
+      (data as [Date, number][]).forEach((datum, dataIndex) => {
+        if (datum[1] !== null) {
+          showValueIndexes[dataIndex] = seriesIndex;
+        }
+      });
+    });
+  }
+
   rawSeries.forEach(entry => {
     const transformedSeries = transformSeries(entry, colorScale, {
       area,
+      filterState,
       forecastEnabled,
       markerEnabled,
       markerSize,
-      opacity,
+      areaOpacity: opacity,
       seriesType,
       stack,
+      formatter,
+      showValue,
+      totalStackedValues,
+      showValueIndexes,
     });
     if (transformedSeries) series.push(transformedSeries);
   });
+
+  const selectedValues = (filterState.selectedValues || []).reduce(
+    (acc: Record<string, number>, selectedValue: string) => {
+      const index = series.findIndex(({ name }) => name === selectedValue);
+      return {
+        ...acc,
+        [index]: selectedValue,
+      };
+    },
+    {},
+  );
 
   annotationLayers
     .filter((layer: AnnotationLayer) => layer.show)
@@ -212,8 +254,7 @@ export default function transformProps(
       data: rawSeries
         .filter(
           entry =>
-            extractForecastSeriesContext((entry.name || '') as string).type ===
-            ForecastSeriesEnum.Observation,
+            extractForecastSeriesContext(entry.name || '').type === ForecastSeriesEnum.Observation,
         )
         .map(entry => entry.name || '')
         .concat(extractAnnotationLabels(annotationLayers, annotationData)),
@@ -246,13 +287,14 @@ export default function transformProps(
   };
 
   return {
-    formData,
-    width,
-    height,
     echartOptions,
-    setDataMask,
     emitFilter,
-    labelMap,
+    formData,
     groupby,
+    height,
+    labelMap,
+    selectedValues,
+    setDataMask,
+    width,
   };
 }

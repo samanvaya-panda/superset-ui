@@ -51,13 +51,15 @@ export function formatPieLabel({
   params,
   labelType,
   numberFormatter,
+  sanitizeName = false,
 }: {
-  params: CallbackDataParams;
+  params: Pick<CallbackDataParams, 'name' | 'value' | 'percent'>;
   labelType: EchartsPieLabelType;
   numberFormatter: NumberFormatter;
+  sanitizeName?: boolean;
 }): string {
   const { name: rawName = '', value, percent } = params;
-  const name = sanitizeHtml(rawName);
+  const name = sanitizeName ? sanitizeHtml(rawName) : rawName;
   const formattedValue = numberFormatter(value as number);
   const formattedPercent = percentFormatter((percent as number) / 100);
 
@@ -148,7 +150,7 @@ export default function transformProps(chartProps: EchartsPieChartProps): PieCha
       name,
       itemStyle: {
         color: colorFn(name),
-        opacity: isFiltered ? OpacityEnum.Transparent : OpacityEnum.NonTransparent,
+        opacity: isFiltered ? OpacityEnum.SemiTransparent : OpacityEnum.NonTransparent,
       },
     };
   });
@@ -221,6 +223,7 @@ export default function transformProps(chartProps: EchartsPieChartProps): PieCha
           params,
           numberFormatter,
           labelType: EchartsPieLabelType.KeyValuePercent,
+          sanitizeName: true,
         }),
     },
     legend: {

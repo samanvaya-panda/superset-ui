@@ -16,20 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import {
-  FeatureFlag,
-  isFeatureEnabled,
-  QueryFormMetric,
-  smartDateFormatter,
-  t,
-  validateNonEmpty,
-} from '@superset-ui/core';
+import { QueryFormMetric, smartDateFormatter, t, validateNonEmpty } from '@superset-ui/core';
 import {
   ControlPanelConfig,
   D3_TIME_FORMAT_OPTIONS,
   formatSelectOptions,
   sections,
   sharedControls,
+  emitFilterControl,
 } from '@superset-ui/chart-controls';
 import { MetricsLayoutEnum } from '../types';
 
@@ -86,11 +80,26 @@ const config: ControlPanelConfig = {
           },
         ],
         ['adhoc_filters'],
+        emitFilterControl,
         [
           {
             name: 'row_limit',
             config: {
               ...sharedControls.row_limit,
+            },
+          },
+        ],
+        ['timeseries_limit_metric'],
+        [
+          {
+            name: 'order_desc',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Sort descending'),
+              default: true,
+              description: t(
+                'Whether to sort descending or ascending. Takes effect only when "Sort by" is set',
+              ),
             },
           },
         ],
@@ -133,6 +142,30 @@ const config: ControlPanelConfig = {
                 'Aggregate function to apply when pivoting and computing the total rows and columns',
               ),
               renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
+            name: 'rowTotals',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Show rows total'),
+              default: false,
+              renderTrigger: true,
+              description: t('Display row level total'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'colTotals',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Show columns total'),
+              default: false,
+              renderTrigger: true,
+              description: t('Display column level total'),
             },
           },
         ],
@@ -184,7 +217,6 @@ const config: ControlPanelConfig = {
               label: t('Date format'),
               default: smartDateFormatter.id,
               renderTrigger: true,
-              clearable: false,
               choices: D3_TIME_FORMAT_OPTIONS,
               description: t('D3 time format for datetime columns'),
             },
@@ -208,6 +240,8 @@ const config: ControlPanelConfig = {
               description: t('Order of rows'),
             },
           },
+        ],
+        [
           {
             name: 'colOrder',
             config: {
@@ -231,7 +265,7 @@ const config: ControlPanelConfig = {
             name: 'rowSubtotalPosition',
             config: {
               type: 'SelectControl',
-              label: t('Rows subtotals position'),
+              label: t('Rows subtotal position'),
               default: false,
               choices: [
                 // [value, label]
@@ -239,14 +273,16 @@ const config: ControlPanelConfig = {
                 [false, t('Bottom')],
               ],
               renderTrigger: true,
-              description: t('Position of row level subtotals'),
+              description: t('Position of row level subtotal'),
             },
           },
+        ],
+        [
           {
             name: 'colSubtotalPosition',
             config: {
               type: 'SelectControl',
-              label: t('Cols subtotals position'),
+              label: t('Cols subtotal position'),
               default: false,
               choices: [
                 // [value, label]
@@ -254,55 +290,17 @@ const config: ControlPanelConfig = {
                 [false, t('Right')],
               ],
               renderTrigger: true,
-              description: t('Position of column level subtotals'),
+              description: t('Position of column level subtotal'),
             },
           },
         ],
-        [
-          {
-            name: 'rowTotals',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Show rows totals'),
-              default: true,
-              renderTrigger: true,
-              description: t('Display row level totals'),
-            },
-          },
-          {
-            name: 'colTotals',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Show cols totals'),
-              default: true,
-              renderTrigger: true,
-              description: t('Display column level totals'),
-            },
-          },
-        ],
-        isFeatureEnabled(FeatureFlag.DASHBOARD_CROSS_FILTERS)
-          ? [
-              {
-                name: 'emitFilter',
-                config: {
-                  type: 'CheckboxControl',
-                  label: t('Enable emitting filters'),
-                  renderTrigger: true,
-                  default: false,
-                  description: t(
-                    'Whether to apply filter to dashboards when table cells are clicked',
-                  ),
-                },
-              },
-            ]
-          : [],
         [
           {
             name: 'conditional_formatting',
             config: {
               type: 'ConditionalFormattingControl',
               renderTrigger: true,
-              label: t('Customize metrics'),
+              label: t('Conditional formatting'),
               description: t('Apply conditional color formatting to metrics'),
               mapStateToProps(explore) {
                 const values = (explore?.controls?.metrics?.value as QueryFormMetric[]) ?? [];

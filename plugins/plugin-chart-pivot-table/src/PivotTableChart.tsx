@@ -24,6 +24,7 @@ import {
   getNumberFormatter,
   DataRecordValue,
   NumberFormatter,
+  useTheme,
 } from '@superset-ui/core';
 // @ts-ignore
 import PivotTable from '@superset-ui/react-pivottable/PivotTable';
@@ -39,11 +40,12 @@ import {
 } from './types';
 
 const Styles = styled.div<PivotTableStylesProps>`
-  padding: ${({ theme }) => theme.gridUnit * 4}px;
-  height: ${({ height }) => height}px;
-  width: ${({ width }) => width}px;
-  overflow-y: scroll;
-  }
+  ${({ height, width, margin }) => `
+      margin: ${margin}px;
+      height: ${height - margin * 2}px;
+      width: ${width - margin * 2}px;
+      overflow-y: scroll;
+ `}
 `;
 
 const METRIC_KEY = 'metric';
@@ -52,7 +54,7 @@ const iconStyle = { stroke: 'black', strokeWidth: '16px' };
 const aggregatorsFactory = (formatter: NumberFormatter) => ({
   Count: aggregatorTemplates.count(formatter),
   'Count Unique Values': aggregatorTemplates.countUnique(formatter),
-  'List Unique Values': aggregatorTemplates.listUnique(', '),
+  'List Unique Values': aggregatorTemplates.listUnique(', ', formatter),
   Sum: aggregatorTemplates.sum(formatter),
   Average: aggregatorTemplates.average(formatter),
   Median: aggregatorTemplates.median(formatter),
@@ -60,7 +62,7 @@ const aggregatorsFactory = (formatter: NumberFormatter) => ({
   'Sample Standard Deviation': aggregatorTemplates.stdev(1, formatter),
   Minimum: aggregatorTemplates.min(formatter),
   Maximum: aggregatorTemplates.max(formatter),
-  First: aggregatorTemplates.first(),
+  First: aggregatorTemplates.first(formatter),
   Last: aggregatorTemplates.last(formatter),
   'Sum as Fraction of Total': aggregatorTemplates.fractionOf(
     aggregatorTemplates.sum(),
@@ -122,6 +124,7 @@ export default function PivotTableChart(props: PivotTableProps) {
     dateFormatters,
   } = props;
 
+  const theme = useTheme();
   const defaultFormatter = getNumberFormatter(valueFormat);
   const columnFormatsArray = Object.entries(columnFormats);
   const hasCustomMetricFormatters = columnFormatsArray.length > 0;
@@ -144,11 +147,13 @@ export default function PivotTableChart(props: PivotTableProps) {
       data.reduce(
         (acc: Record<string, any>[], record: Record<string, any>) => [
           ...acc,
-          ...metricNames.map((name: string) => ({
-            ...record,
-            [METRIC_KEY]: name,
-            value: record[name],
-          })),
+          ...metricNames
+            .map((name: string) => ({
+              ...record,
+              [METRIC_KEY]: name,
+              value: record[name],
+            }))
+            .filter(record => record.value !== null),
         ],
         [],
       ),
@@ -244,7 +249,7 @@ export default function PivotTableChart(props: PivotTableProps) {
   );
 
   return (
-    <Styles height={height} width={width}>
+    <Styles height={height} width={width} margin={theme.gridUnit * 4}>
       <PivotTable
         data={unpivotedData}
         rows={rows}

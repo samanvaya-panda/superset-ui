@@ -17,19 +17,14 @@
  * under the License.
  */
 import React from 'react';
-import {
-  FeatureFlag,
-  isFeatureEnabled,
-  legacyValidateInteger,
-  legacyValidateNumber,
-  t,
-} from '@superset-ui/core';
+import { legacyValidateInteger, legacyValidateNumber, t } from '@superset-ui/core';
 import {
   ControlPanelConfig,
   ControlPanelsContainerProps,
   D3_TIME_FORMAT_DOCS,
   sections,
   sharedControls,
+  emitFilterControl,
 } from '@superset-ui/chart-controls';
 
 import {
@@ -37,13 +32,12 @@ import {
   EchartsTimeseriesContributionType,
   EchartsTimeseriesSeriesType,
 } from './types';
-import { legendSection } from '../controls';
+import { legendSection, showValueControl } from '../controls';
 
 const {
   area,
   annotationLayers,
   contributionMode,
-  emitFilter,
   forecastEnabled,
   forecastInterval,
   forecastPeriods,
@@ -90,6 +84,7 @@ const config: ControlPanelConfig = {
           },
         ],
         ['adhoc_filters'],
+        emitFilterControl,
         ['limit'],
         ['timeseries_limit_metric'],
         [
@@ -106,6 +101,7 @@ const config: ControlPanelConfig = {
         ['row_limit'],
       ],
     },
+    sections.advancedAnalytics,
     {
       label: t('Annotations and Layers'),
       expanded: false,
@@ -117,7 +113,7 @@ const config: ControlPanelConfig = {
               type: 'AnnotationLayerControl',
               label: '',
               default: annotationLayers,
-              description: 'Annotation Layers',
+              description: t('Annotation Layers'),
             },
           },
         ],
@@ -244,6 +240,7 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [showValueControl],
         [
           {
             name: 'stack',
@@ -325,20 +322,6 @@ const config: ControlPanelConfig = {
             },
           },
         ],
-        isFeatureEnabled(FeatureFlag.DASHBOARD_CROSS_FILTERS)
-          ? [
-              {
-                name: 'emit_filter',
-                config: {
-                  type: 'CheckboxControl',
-                  label: t('Enable emitting filters'),
-                  default: emitFilter,
-                  renderTrigger: true,
-                  description: t('Enable emmiting filters.'),
-                },
-              },
-            ]
-          : [],
         ...legendSection,
         [<h1 className="section-header">{t('X Axis')}</h1>],
         [

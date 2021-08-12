@@ -43,6 +43,7 @@ import {
   ControlPanelState,
   ExtraControlProps,
   ControlState,
+  emitFilterControl,
 } from '@superset-ui/chart-controls';
 
 import i18n from './i18n';
@@ -184,7 +185,6 @@ const config: ControlPanelConfig = {
               mapStateToProps: (state: ControlPanelState, controlState: ControlState) => {
                 const { controls } = state;
                 const originalMapStateToProps = sharedControls?.groupby?.mapStateToProps;
-                // @ts-ignore
                 const newState = originalMapStateToProps?.(state, controlState) ?? {};
                 newState.externalValidationErrors = validateAggControlValues(controls, [
                   controls.metrics?.value,
@@ -261,17 +261,20 @@ const config: ControlPanelConfig = {
             },
           },
         ],
-        [
-          {
-            name: 'server_pagination',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Server pagination'),
-              description: t('Enable server side pagination of results (experimental feature)'),
-              default: false,
-            },
-          },
-        ],
+        isFeatureEnabled(FeatureFlag.DASHBOARD_CROSS_FILTERS) ||
+        isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS)
+          ? [
+              {
+                name: 'server_pagination',
+                config: {
+                  type: 'CheckboxControl',
+                  label: t('Server pagination'),
+                  description: t('Enable server side pagination of results (experimental feature)'),
+                  default: false,
+                },
+              },
+            ]
+          : [],
         [
           {
             name: 'row_limit',
@@ -333,6 +336,7 @@ const config: ControlPanelConfig = {
           },
         ],
         ['adhoc_filters'],
+        emitFilterControl,
       ],
     },
     {
@@ -419,22 +423,6 @@ const config: ControlPanelConfig = {
             },
           },
         ],
-        isFeatureEnabled(FeatureFlag.DASHBOARD_CROSS_FILTERS)
-          ? [
-              {
-                name: 'table_filter',
-                config: {
-                  type: 'CheckboxControl',
-                  label: t('Enable emitting filters'),
-                  renderTrigger: true,
-                  default: false,
-                  description: t(
-                    'Whether to apply filter to dashboards when table cells are clicked',
-                  ),
-                },
-              },
-            ]
-          : [],
         [
           {
             name: 'column_config',
@@ -446,6 +434,7 @@ const config: ControlPanelConfig = {
               mapStateToProps(explore, control, chart) {
                 return {
                   queryResponse: chart?.queriesResponse?.[0] as ChartDataResponseResult | undefined,
+                  emitFilter: explore?.controls?.table_filter?.value,
                 };
               },
             },

@@ -68,6 +68,7 @@ import {
   dnd_adhoc_filters,
   dnd_adhoc_metric,
   dnd_adhoc_metrics,
+  dnd_granularity_sqla,
   dnd_sort_by,
   dnd_secondary_metric,
   dnd_size,
@@ -77,6 +78,7 @@ import {
   dndEntity,
   dndGroupByControl,
   dndSeries,
+  dnd_adhoc_metric_2,
 } from './dndControls';
 
 const categoricalSchemeRegistry = getCategoricalSchemeRegistry();
@@ -469,14 +471,14 @@ const sharedControls = {
   datasource: datasourceControl,
   viz_type,
   color_picker,
-  metric_2,
+  metric_2: enableExploreDnd ? dnd_adhoc_metric_2 : metric_2,
   linear_color_scheme,
   secondary_metric: enableExploreDnd ? dnd_secondary_metric : secondary_metric,
   groupby: enableExploreDnd ? dndGroupByControl : groupByControl,
   columns: enableExploreDnd ? dndColumnsControl : columnsControl,
   druid_time_origin,
   granularity,
-  granularity_sqla,
+  granularity_sqla: enableExploreDnd ? dnd_granularity_sqla : granularity_sqla,
   time_grain_sqla,
   time_range,
   row_limit,
