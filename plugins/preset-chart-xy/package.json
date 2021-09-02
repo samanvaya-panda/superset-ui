@@ -35,7 +35,7 @@
     "@superset-ui/core": "0.18.0",
     "@vx/axis": "^0.0.198",
     "@vx/legend": "^0.0.198",
-    "@vx/scale": "^0.0.197",
+    "@vx/scale": "^0.0.199",
     "csstype": "^2.6.3",
     "encodable": "^0.7.6",
     "lodash": "^4.17.11",
