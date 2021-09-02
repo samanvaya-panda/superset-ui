@@ -37,7 +37,12 @@ import {
 } from './types';
 import { ForecastSeriesEnum, ProphetValue } from '../types';
 import { parseYAxisBound } from '../utils/controls';
-import { dedupSeries, extractTimeseriesSeries, getLegendProps } from '../utils/series';
+import {
+  dedupSeries,
+  extractTimeseriesSeries,
+  getLegendProps,
+  currentSeries,
+} from '../utils/series';
 import { extractAnnotationLabels } from '../utils/annotation';
 import {
   extractForecastSeriesContext,
@@ -61,7 +66,8 @@ import { TIMESERIES_CONSTANTS } from '../constants';
 export default function transformProps(
   chartProps: EchartsTimeseriesChartProps,
 ): TimeseriesChartTransformedProps {
-  const { width, height, filterState, formData, hooks, queriesData } = chartProps;
+  const { width, height, filterState, formData, hooks, queriesData, datasource } = chartProps;
+  const { verboseMap = {} } = datasource;
   const {
     annotation_data: annotationData_,
     data = [],
@@ -96,10 +102,11 @@ export default function transformProps(
     emitFilter,
     groupby,
     showValue,
+    onlyTotal,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
 
   const colorScale = CategoricalColorNamespace.getScale(colorScheme as string);
-  const rebasedData = rebaseTimeseriesDatum(data);
+  const rebasedData = rebaseTimeseriesDatum(data, verboseMap);
   const rawSeries = extractTimeseriesSeries(rebasedData, {
     fillNeighborValue: stack && !forecastEnabled ? 0 : undefined,
   });
@@ -109,18 +116,18 @@ export default function transformProps(
   const totalStackedValues: number[] = [];
   const showValueIndexes: number[] = [];
 
-  if (stack) {
-    rebasedData.forEach(data => {
-      const values = Object.keys(data).reduce((prev, curr) => {
-        if (curr === '__timestamp') {
-          return prev;
-        }
-        const value = data[curr] || 0;
-        return prev + (value as number);
-      }, 0);
-      totalStackedValues.push(values);
-    });
+  rebasedData.forEach(data => {
+    const values = Object.keys(data).reduce((prev, curr) => {
+      if (curr === '__timestamp') {
+        return prev;
+      }
+      const value = data[curr] || 0;
+      return prev + (value as number);
+    }, 0);
+    totalStackedValues.push(values);
+  });
 
+  if (stack) {
     rawSeries.forEach((entry, seriesIndex) => {
       const { data = [] } = entry;
       (data as [Date, number][]).forEach((datum, dataIndex) => {
@@ -143,8 +150,10 @@ export default function transformProps(
       stack,
       formatter,
       showValue,
+      onlyTotal,
       totalStackedValues,
       showValueIndexes,
+      richTooltip,
     });
     if (transformedSeries) series.push(transformedSeries);
   });
@@ -225,6 +234,7 @@ export default function transformProps(
     },
     tooltip: {
       ...defaultTooltip,
+      appendToBody: true,
       trigger: richTooltip ? 'axis' : 'item',
       formatter: (params: any) => {
         const value: number = !richTooltip ? params.value : params[0].value[0];
@@ -237,13 +247,16 @@ export default function transformProps(
 
         Object.keys(prophetValues).forEach(key => {
           const value = prophetValues[key];
-          rows.push(
-            formatProphetTooltipSeries({
-              ...value,
-              seriesName: key,
-              formatter,
-            }),
-          );
+          const content = formatProphetTooltipSeries({
+            ...value,
+            seriesName: key,
+            formatter,
+          });
+          if (currentSeries.name === key) {
+            rows.push(`<span style="font-weight: 700">${content}</span>`);
+          } else {
+            rows.push(`<span style="opacity: 0.7">${content}</span>`);
+          }
         });
         return rows.join('<br />');
       },
