@@ -70,7 +70,7 @@
     "@types/react-loadable": "^5.5.3",
     "@types/react-resizable": "^1.7.2",
     "@types/storybook__react": "5.2.1",
-    "antd": "^4.9.4",
+    "antd": "^5.1.4",
     "bootstrap": "^3.4.1",
     "core-js": "3.8.3",
     "gh-pages": "^3.0.0",
